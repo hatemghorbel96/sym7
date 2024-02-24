@@ -63,12 +63,19 @@ class CompanyController extends AbstractController
     }
 
     #[Route('/api/companies/{id}', name: 'company_delete', methods: ['DELETE'])]
-    public function delete(Company $company,ManagerRegistry $doctrine): JsonResponse
+    public function delete(int $id, EntityManagerInterface $entityManager, CompanyRepository $companyRepository): JsonResponse
     {
-        $entityManager = $doctrine->getManager();
+
+        $company = $companyRepository->find($id);
+
+        if (!$company) {
+            return new JsonResponse(['error' => 'Company not found'], Response::HTTP_NOT_FOUND);
+        }
+
         $entityManager->remove($company);
         $entityManager->flush();
 
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(['message' => 'Company deleted successfully'], Response::HTTP_OK);
     }
+
 }
